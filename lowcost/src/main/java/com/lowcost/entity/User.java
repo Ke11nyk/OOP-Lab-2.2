@@ -26,7 +26,7 @@ public class User {
     private String salt;
 
 
-    public User(String id, String login, String email, String role) {
+    public User(int id, String login, String email, String role) {
         this.Id = id;
         this.email = email;
         this.login = login;
