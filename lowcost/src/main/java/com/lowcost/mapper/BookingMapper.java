@@ -1,0 +1,106 @@
+package com.lowcost.mapper;
+
+import com.lowcost.dto.BookingDTO;
+import com.lowcost.entity.Booking;
+import com.lowcost.entity.Flight;
+import com.lowcost.entity.User;
+import com.lowcost.repository.FlightRepo;
+import com.lowcost.repository.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+public class BookingMapper {
+
+    private final FlightRepo flightRepository;
+    private final UserRepo userRepository;
+
+    @Autowired
+    public BookingMapper(FlightRepo flightRepository, UserRepo userRepository) {
+        this.flightRepository = flightRepository;
+        this.userRepository = userRepository;
+    }
+
+    public BookingDTO toDTO(Booking booking) {
+        if (booking == null) {
+            return null;
+        }
+
+        BookingDTO dto = BookingDTO.builder()
+                .id(booking.getId())
+                .userId(booking.getUserId())
+                .flightId(booking.getFlightId())
+                .bookingReference(booking.getBookingReference())
+                .bookingDate(booking.getBookingDate())
+                .totalPrice(booking.getTotalPrice())
+                .status(booking.getStatus().name())
+                .priorityBoarding(booking.isPriorityBoarding())
+                .checkedBaggage(booking.isCheckedBaggage())
+                .baggageCount(booking.getBaggageCount())
+                .build();
+
+        // Додаємо додаткову інформацію з пов'язаних сутностей, якщо вони доступні
+        Optional<Flight> flightOpt = flightRepository.findById(booking.getFlightId());
+        flightOpt.ifPresent(flight -> {
+            dto.setFlightNumber(flight.getFlightNumber());
+            dto.setDepartureAirport(flight.getDepartureAirport());
+            dto.setArrivalAirport(flight.getArrivalAirport());
+            dto.setDepartureTime(flight.getDepartureTime());
+            dto.setArrivalTime(flight.getArrivalTime());
+        });
+
+        Optional<User> userOpt = userRepository.findById(String.valueOf(booking.getUserId()));
+        userOpt.ifPresent(user -> {
+            dto.setUserFullName(user.getLogin()); // Припускаючи, що у вас немає поля fullName у User
+        });
+
+        return dto;
+    }
+
+    public List<BookingDTO> toDTOList(List<Booking> bookings) {
+        if (bookings == null) {
+            return null;
+        }
+
+        return bookings.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Booking toEntity(BookingDTO bookingDTO) {
+        if (bookingDTO == null) {
+            return null;
+        }
+
+        Booking booking = new Booking();
+        booking.setId(bookingDTO.getId());
+        booking.setUserId(bookingDTO.getUserId());
+        booking.setFlightId(bookingDTO.getFlightId());
+        booking.setBookingReference(bookingDTO.getBookingReference());
+        booking.setBookingDate(bookingDTO.getBookingDate());
+        booking.setTotalPrice(bookingDTO.getTotalPrice());
+        booking.setStatus(Booking.BookingStatus.valueOf(bookingDTO.getStatus()));
+        booking.setPriorityBoarding(bookingDTO.isPriorityBoarding());
+        booking.setCheckedBaggage(bookingDTO.isCheckedBaggage());
+        booking.setBaggageCount(bookingDTO.getBaggageCount());
+
+        return booking;
+    }
+
+    public void updateEntityFromDTO(BookingDTO bookingDTO, Booking booking) {
+        if (bookingDTO == null || booking == null) {
+            return;
+        }
+
+        // Зазвичай ми не оновлюємо userId, flightId та bookingReference після створення
+        booking.setTotalPrice(bookingDTO.getTotalPrice());
+        booking.setStatus(Booking.BookingStatus.valueOf(bookingDTO.getStatus()));
+        booking.setPriorityBoarding(bookingDTO.isPriorityBoarding());
+        booking.setCheckedBaggage(bookingDTO.isCheckedBaggage());
+        booking.setBaggageCount(bookingDTO.getBaggageCount());
+    }
+}
