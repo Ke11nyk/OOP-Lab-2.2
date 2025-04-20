@@ -28,7 +28,8 @@ public class PriceHistory {
     @Column(name = "applied_at")
     private LocalDateTime changeTime;
     @Column(name = "reason")
-    private PriceChangeReason reason; // Enum
+    @Enumerated(EnumType.STRING)  // Зберігатиме значення як текст
+    private PriceChangeReason reason;
 
     public enum PriceChangeReason {
         DEMAND_INCREASE,

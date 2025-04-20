@@ -13,7 +13,8 @@ import java.util.List;
 public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
     List<PriceHistory> findByFlightId(int flightId);
 
-    List<PriceHistory> findByReason(PriceHistory.PriceChangeReason reason);
+    @Query("SELECT ph FROM PriceHistory ph WHERE ph.reason = :reason")
+    List<PriceHistory> findByReason(@Param("reason") PriceHistory.PriceChangeReason reason);
 
     List<PriceHistory> findByChangeTimeBetween(LocalDateTime start, LocalDateTime end);
 
@@ -22,7 +23,7 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
     PriceHistory findLatestPriceChangeByFlight(@Param("flightId") int flightId);
 
     @Query("SELECT COUNT(ph) FROM PriceHistory ph " +
-            "WHERE ph.reason = com.lowcost.entity.PriceHistory.PriceChangeReason.DEMAND_INCREASE " +
+            "WHERE ph.reason = 'DEMAND_INCREASE' " +  // Зверніть увагу на лапки
             "AND ph.flightId = :flightId")
     int countDemandIncreasesForFlight(@Param("flightId") int flightId);
 
