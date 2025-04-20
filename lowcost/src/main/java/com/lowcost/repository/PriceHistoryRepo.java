@@ -21,8 +21,9 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
             "ORDER BY ph.changeTime DESC LIMIT 1")
     PriceHistory findLatestPriceChangeByFlight(@Param("flightId") int flightId);
 
-    @Query("SELECT COUNT(ph) FROM PriceHistory ph WHERE ph.flightId = :flightId " +
-            "AND ph.reason = 'DEMAND_INCREASE'")
+    @Query("SELECT COUNT(ph) FROM PriceHistory ph " +
+            "WHERE ph.reason = com.lowcost.entity.PriceHistory.PriceChangeReason.DEMAND_INCREASE " +
+            "AND ph.flightId = :flightId")
     int countDemandIncreasesForFlight(@Param("flightId") int flightId);
 
     List<PriceHistory> findByFlightIdAndReasonOrderByChangeTimeDesc(

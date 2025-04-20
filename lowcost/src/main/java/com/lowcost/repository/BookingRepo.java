@@ -26,8 +26,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.flightId = :flightId " +
-            "AND b.status NOT IN ('CANCELLED', 'REFUNDED')")
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.flightId = :flightId AND b.status IN (com.lowcost.entity.Booking.BookingStatus.CONFIRMED, com.lowcost.entity.Booking.BookingStatus.PAID)")
     int countActiveBookingsByFlight(@Param("flightId") int flightId);
 
     List<Booking> findByBookingDateAfterAndStatus(
