@@ -1,0 +1,254 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: developer
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: login
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: salt
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: developer
+      changes:
+        - createTable:
+            tableName: flights
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: flight_number
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: departure_airport
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: arrival_airport
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: departure_time
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: arrival_time
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: base_price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_seats
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: available_seats
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 3
+      author: developer
+      changes:
+        - createTable:
+            tableName: bookings
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_booking_user
+                    references: users(id)
+              - column:
+                  name: flight_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_booking_flight
+                    references: flights(id)
+              - column:
+                  name: booking_reference
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: booking_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: has_priority_boarding
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: has_checked_baggage
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: baggage_count
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 4
+      author: developer
+      changes:
+        - createTable:
+            tableName: price_adjustments
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: flight_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_price_adjustment_flight
+                    references: flights(id)
+              - column:
+                  name: old_price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applied_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reason
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 5
+      author: developer
+      changes:
+        - createIndex:
+            indexName: idx_flights_departure_time
+            tableName: flights
+            columns:
+              - column:
+                  name: departure_time
+        - createIndex:
+            indexName: idx_flights_departure_arrival
+            tableName: flights
+            columns:
+              - column:
+                  name: departure_airport
+              - column:
+                  name: arrival_airport
+        - createIndex:
+            indexName: idx_bookings_user
+            tableName: bookings
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            indexName: idx_bookings_flight
+            tableName: bookings
+            columns:
+              - column:
+                  name: flight_id
+        - createIndex:
+            indexName: idx_price_adjustments_flight
+            tableName: price_adjustments
+            columns:
+              - column:
+                  name: flight_id
