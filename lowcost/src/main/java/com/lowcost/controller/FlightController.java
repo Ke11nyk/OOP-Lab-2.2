@@ -1,6 +1,8 @@
 package com.lowcost.controller;
 
+import com.lowcost.dto.FlightDTO;
 import com.lowcost.entity.Flight;
+import com.lowcost.mapper.FlightMapper;
 import com.lowcost.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,44 +19,52 @@ import java.util.List;
 public class FlightController {
 
     private final FlightService flightService;
+    private final FlightMapper flightMapper;
 
     @Autowired
-    public FlightController(FlightService flightService) {
+    public FlightController(FlightService flightService, FlightMapper flightMapper) {
         this.flightService = flightService;
+        this.flightMapper = flightMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<Flight>> getAllFlights() {
-        return ResponseEntity.ok(flightService.getAllFlights());
+    public ResponseEntity<List<FlightDTO>> getAllFlights() {
+        List<Flight> flights = flightService.getAllFlights();
+        return ResponseEntity.ok(flightMapper.toDTOList(flights));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Flight> getFlightById(@PathVariable int id) {
+    public ResponseEntity<FlightDTO> getFlightById(@PathVariable int id) {
         return flightService.getFlightById(id)
+                .map(flightMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Flight>> searchFlights(
+    public ResponseEntity<List<FlightDTO>> searchFlights(
             @RequestParam String departure,
             @RequestParam String arrival,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        return ResponseEntity.ok(flightService.searchFlights(departure, arrival, startDate, endDate));
+        List<Flight> flights = flightService.searchFlights(departure, arrival, startDate, endDate);
+        return ResponseEntity.ok(flightMapper.toDTOList(flights));
     }
 
     @PostMapping
-    public ResponseEntity<Flight> createFlight(@RequestBody Flight flight) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(flightService.saveFlight(flight));
+    public ResponseEntity<FlightDTO> createFlight(@RequestBody FlightDTO flightDTO) {
+        Flight flight = flightMapper.toEntity(flightDTO);
+        Flight savedFlight = flightService.saveFlight(flight);
+        return ResponseEntity.status(HttpStatus.CREATED).body(flightMapper.toDTO(savedFlight));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Flight> updateFlight(@PathVariable int id, @RequestBody Flight flight) {
+    public ResponseEntity<FlightDTO> updateFlight(@PathVariable int id, @RequestBody FlightDTO flightDTO) {
         return flightService.getFlightById(id)
                 .map(existingFlight -> {
-                    flight.setId(id);
-                    return ResponseEntity.ok(flightService.saveFlight(flight));
+                    flightMapper.updateEntityFromDTO(flightDTO, existingFlight);
+                    Flight updatedFlight = flightService.saveFlight(existingFlight);
+                    return ResponseEntity.ok(flightMapper.toDTO(updatedFlight));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -89,14 +99,12 @@ public class FlightController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Admin endpoint to run price adjustment based on approaching departure dates
     @PostMapping("/adjust-prices-by-departure")
     public ResponseEntity<Void> adjustPricesByDeparture() {
         flightService.checkAndAdjustPriceBasedOnDeparture();
         return ResponseEntity.noContent().build();
     }
 
-    // Admin endpoint to adjust price based on demand
     @PatchMapping("/{id}/adjust-price-by-demand")
     public ResponseEntity<Void> adjustPriceByDemand(@PathVariable int id, @RequestParam BigDecimal newPrice) {
         return flightService.getFlightById(id)

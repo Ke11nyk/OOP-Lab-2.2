@@ -1,6 +1,8 @@
 package com.lowcost.controller;
 
+import com.lowcost.dto.BookingDTO;
 import com.lowcost.entity.Booking;
+import com.lowcost.mapper.BookingMapper;
 import com.lowcost.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,50 +17,58 @@ import java.util.Map;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final BookingMapper bookingMapper;
 
     @Autowired
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, BookingMapper bookingMapper) {
         this.bookingService = bookingService;
+        this.bookingMapper = bookingMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<Booking>> getAllBookings() {
-        return ResponseEntity.ok(bookingService.getAllBookings());
+    public ResponseEntity<List<BookingDTO>> getAllBookings() {
+        List<Booking> bookings = bookingService.getAllBookings();
+        return ResponseEntity.ok(bookingMapper.toDTOList(bookings));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable int id) {
+    public ResponseEntity<BookingDTO> getBookingById(@PathVariable int id) {
         return bookingService.getBookingById(id)
+                .map(bookingMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/reference/{reference}")
-    public ResponseEntity<Booking> getBookingByReference(@PathVariable String reference) {
+    public ResponseEntity<BookingDTO> getBookingByReference(@PathVariable String reference) {
         return bookingService.getBookingByReference(reference)
+                .map(bookingMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Booking>> getBookingsByUserId(@PathVariable int userId) {
-        return ResponseEntity.ok(bookingService.getBookingsByUserId(userId));
+    public ResponseEntity<List<BookingDTO>> getBookingsByUserId(@PathVariable int userId) {
+        List<Booking> bookings = bookingService.getBookingsByUserId(userId);
+        return ResponseEntity.ok(bookingMapper.toDTOList(bookings));
     }
 
     @GetMapping("/user/{userId}/status/{status}")
-    public ResponseEntity<List<Booking>> getBookingsByUserIdAndStatus(
+    public ResponseEntity<List<BookingDTO>> getBookingsByUserIdAndStatus(
             @PathVariable int userId,
             @PathVariable Booking.BookingStatus status) {
-        return ResponseEntity.ok(bookingService.getBookingsByUserIdAndStatus(userId, status));
+        List<Booking> bookings = bookingService.getBookingsByUserIdAndStatus(userId, status);
+        return ResponseEntity.ok(bookingMapper.toDTOList(bookings));
     }
 
     @GetMapping("/flight/{flightId}")
-    public ResponseEntity<List<Booking>> getBookingsByFlightId(@PathVariable int flightId) {
-        return ResponseEntity.ok(bookingService.getBookingsByFlightId(flightId));
+    public ResponseEntity<List<BookingDTO>> getBookingsByFlightId(@PathVariable int flightId) {
+        List<Booking> bookings = bookingService.getBookingsByFlightId(flightId);
+        return ResponseEntity.ok(bookingMapper.toDTOList(bookings));
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<BookingDTO> createBooking(@RequestBody Map<String, Object> request) {
         try {
             int userId = (int) request.get("userId");
             int flightId = (int) request.get("flightId");
@@ -68,7 +78,7 @@ public class BookingController {
 
             Booking booking = bookingService.createBooking(userId, flightId, priorityBoarding,
                     checkedBaggage, baggageCount);
-            return ResponseEntity.status(HttpStatus.CREATED).body(booking);
+            return ResponseEntity.status(HttpStatus.CREATED).body(bookingMapper.toDTO(booking));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -115,11 +125,12 @@ public class BookingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable int id, @RequestBody Booking booking) {
+    public ResponseEntity<BookingDTO> updateBooking(@PathVariable int id, @RequestBody BookingDTO bookingDTO) {
         return bookingService.getBookingById(id)
                 .map(existingBooking -> {
-                    booking.setId(id);
-                    return ResponseEntity.ok(bookingService.updateBooking(booking));
+                    bookingMapper.updateEntityFromDTO(bookingDTO, existingBooking);
+                    Booking updatedBooking = bookingService.updateBooking(existingBooking);
+                    return ResponseEntity.ok(bookingMapper.toDTO(updatedBooking));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
