@@ -11,25 +11,29 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name="users")
 public class User {
-    @jakarta.persistence.Id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int Id;
+    private int id;
+
     @Column(name = "login")
     private String login;
+
     @Column(name = "email")
     private String email;
+
     @Column(name = "role")
     private String role;
+
     @Column(name = "password")
     private String password;
+
     @Column(name = "salt")
     private String salt;
 
-
-    public User(int id, String login, String email, String role) {
-        this.Id = id;
-        this.email = email;
+    public User(String login, String email, String role) {
         this.login = login;
+        this.email = email;
         this.role = role;
     }
 }

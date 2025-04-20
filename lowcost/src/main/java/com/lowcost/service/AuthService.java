@@ -3,6 +3,7 @@ package com.lowcost.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.lowcost.dto.RegistrationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,40 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepo userRepository;
+
+    public Optional<AuthDTO> register(RegistrationDTO registrationDTO) {
+        // Check if user already exists
+        if (userRepository.findUserByEmail(registrationDTO.getEmail()).isPresent()) {
+            return Optional.empty();
+        }
+
+        // Generate salt and hash password
+        String salt = BCrypt.gensalt();
+        String hashedPassword = BCrypt.hashpw(registrationDTO.getPassword(), salt);
+
+        // Create new user
+        User newUser = new User();
+        newUser.setLogin(registrationDTO.getLogin());
+        newUser.setEmail(registrationDTO.getEmail());
+        newUser.setRole(registrationDTO.getRole() != null ? registrationDTO.getRole() : RoleUtil.USER);
+        newUser.setPassword(hashedPassword);
+        newUser.setSalt(salt);
+
+        // Save user (assuming your repo has a save method)
+        User savedUser = userRepository.save(newUser);
+
+        // Generate JWT token
+        Algorithm algorithm = Algorithm.HMAC256("baeldung");
+        String jwt = JWT.create()
+                .withIssuer("Baeldung")
+                .withClaim("id", savedUser.getId())
+                .withClaim("login", savedUser.getLogin())
+                .withClaim("email", savedUser.getEmail())
+                .withClaim("role", savedUser.getRole())
+                .sign(algorithm);
+
+        return Optional.of(new AuthDTO(jwt));
+    }
 
     public Optional<AuthDTO> auth(LoginDTO loginDTO){
         Optional<User> user = userRepository.findUserByEmail(loginDTO.getEmail());
