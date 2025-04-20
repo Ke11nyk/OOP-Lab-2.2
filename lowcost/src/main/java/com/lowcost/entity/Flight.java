@@ -19,7 +19,7 @@ public class Flight {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @Column(name = "flight_number")
+    @Column(name = "flight_number", nullable = false)
     private String flightNumber;
     @Column(name = "departure_airport")
     private String departureAirport;
