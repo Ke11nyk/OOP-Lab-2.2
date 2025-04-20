@@ -43,6 +43,16 @@ const Login = () => {
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-group">
+                    <label htmlFor="login">Login</label>
+                    <input
+                        type="text"
+                        id="login"
+                        name="login"
+                        value={credentials.login}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
                     <label htmlFor="email">Email</label>  {/* Додали поле email */}
                     <input
                         type="email"
@@ -51,16 +61,6 @@ const Login = () => {
                         value={credentials.email}
                         onChange={handleChange}
                         required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="login">Login</label>
-                    <input
-                        type="text"
-                        id="login"
-                        name="login"
-                        value={credentials.login}
-                        onChange={handleChange}
                     />
                 </div>
                 <div className="form-group">
