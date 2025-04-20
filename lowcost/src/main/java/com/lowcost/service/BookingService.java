@@ -42,7 +42,7 @@ public class BookingService {
     }
 
     public List<Booking> getBookingsByUserIdAndStatus(int userId, Booking.BookingStatus status) {
-        return bookingRepository.findByUserIdAndStatus(userId, status);
+        return bookingRepository.findByUserIdAndStatus(userId, Booking.BookingStatus.valueOf(status.name()));
     }
 
     public List<Booking> getBookingsByFlightId(int flightId) {

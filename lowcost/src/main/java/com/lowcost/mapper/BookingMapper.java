@@ -37,7 +37,7 @@ public class BookingMapper {
                 .bookingReference(booking.getBookingReference())
                 .bookingDate(booking.getBookingDate())
                 .totalPrice(booking.getTotalPrice())
-                .status(booking.getStatus().name())
+                .status(String.valueOf(Booking.BookingStatus.valueOf(booking.getStatus().name())))
                 .priorityBoarding(booking.isPriorityBoarding())
                 .checkedBaggage(booking.isCheckedBaggage())
                 .baggageCount(booking.getBaggageCount())
@@ -83,7 +83,7 @@ public class BookingMapper {
         booking.setBookingReference(bookingDTO.getBookingReference());
         booking.setBookingDate(bookingDTO.getBookingDate());
         booking.setTotalPrice(bookingDTO.getTotalPrice());
-        booking.setStatus(Booking.BookingStatus.valueOf(bookingDTO.getStatus()));
+        booking.setStatus(Booking.BookingStatus.valueOf(String.valueOf(bookingDTO.getStatus())));
         booking.setPriorityBoarding(bookingDTO.isPriorityBoarding());
         booking.setCheckedBaggage(bookingDTO.isCheckedBaggage());
         booking.setBaggageCount(bookingDTO.getBaggageCount());
@@ -98,7 +98,7 @@ public class BookingMapper {
 
         // Зазвичай ми не оновлюємо userId, flightId та bookingReference після створення
         booking.setTotalPrice(bookingDTO.getTotalPrice());
-        booking.setStatus(Booking.BookingStatus.valueOf(bookingDTO.getStatus()));
+        booking.setStatus(Booking.BookingStatus.valueOf(String.valueOf(bookingDTO.getStatus())));
         booking.setPriorityBoarding(bookingDTO.isPriorityBoarding());
         booking.setCheckedBaggage(bookingDTO.isCheckedBaggage());
         booking.setBaggageCount(bookingDTO.getBaggageCount());

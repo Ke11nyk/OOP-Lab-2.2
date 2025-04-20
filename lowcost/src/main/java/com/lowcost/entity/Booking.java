@@ -29,8 +29,9 @@ public class Booking {
     private LocalDateTime bookingDate;
     @Column(name = "total_price")
     private BigDecimal totalPrice;
-    @Column(name = "status")
-    private BookingStatus status; // Enum
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR(20) NOT NULL")
+    private BookingStatus status;
     @Column(name = "has_priority_boarding")
     private boolean priorityBoarding;
     @Column(name = "has_checked_baggage")

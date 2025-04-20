@@ -33,14 +33,24 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/flights", "/api/flights/{id}", "/api/flights/search").authenticated()
+
+                        // Flight endpoints
                         .requestMatchers(HttpMethod.POST, "/api/flights").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/flights/adjust-prices-by-departure").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/flights/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/flights/{id}/price").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/flights/{id}/status").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/flights/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/flights/adjust-prices-by-departure").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/flights/{id}/adjust-price-by-demand").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/flights/{id}").hasRole("ADMIN")
+
+                        // Booking endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/reference/{reference}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/flight/{flightId}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/bookings/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/bookings/{id}").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

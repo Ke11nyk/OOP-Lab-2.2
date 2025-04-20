@@ -33,7 +33,10 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             LocalDateTime date,
             Booking.BookingStatus status);
 
-    List<Booking> findByUserIdAndStatus(int userId, Booking.BookingStatus status);
+    @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND b.status = :status")
+    List<Booking> findByUserIdAndStatus(
+            @Param("userId") int userId,
+            @Param("status") Booking.BookingStatus status);
 
     List<Booking> findByPriorityBoardingTrue();
 
