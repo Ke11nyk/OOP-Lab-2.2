@@ -13,7 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(value = "/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
     private final AuthService authService;
 

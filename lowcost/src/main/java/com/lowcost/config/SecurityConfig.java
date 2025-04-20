@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -45,7 +50,6 @@ public class SecurityConfig {
 
                         // Booking endpoints
                         .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/bookings/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/reference/{reference}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/flight/{flightId}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/bookings/{id}").hasRole("ADMIN")
@@ -69,5 +73,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Дозволяємо фронтенд
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); // Важливо для JWT в браузері
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

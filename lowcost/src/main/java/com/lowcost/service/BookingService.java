@@ -1,8 +1,11 @@
 package com.lowcost.service;
 
+import com.lowcost.dto.BookingWithFlightDTO;
 import com.lowcost.entity.Booking;
 import com.lowcost.entity.Flight;
+import com.lowcost.mapper.FlightMapper;
 import com.lowcost.repository.BookingRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +21,13 @@ public class BookingService {
 
     private final BookingRepo bookingRepository;
     private final FlightService flightService;
+    private final FlightMapper flightMapper;
 
     @Autowired
-    public BookingService(BookingRepo bookingRepository, FlightService flightService) {
+    public BookingService(BookingRepo bookingRepository, FlightService flightService, FlightMapper flightMapper) {
         this.bookingRepository = bookingRepository;
         this.flightService = flightService;
+        this.flightMapper = flightMapper;
     }
 
     public List<Booking> getAllBookings() {
@@ -172,5 +177,28 @@ public class BookingService {
 
     public void deleteBooking(int id) {
         bookingRepository.deleteById(id);
+    }
+
+    public BookingWithFlightDTO getBookingWithFlightDetails(int id) {
+
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        Flight flight = flightService.getFlightById(booking.getFlightId())
+                .orElseThrow(() -> new EntityNotFoundException("Flight not found"));
+
+        return BookingWithFlightDTO.builder()
+                .id(booking.getId())
+                .bookingReference(booking.getBookingReference())
+                .bookingDate(booking.getBookingDate())
+                .totalPrice(booking.getTotalPrice())
+                .status(booking.getStatus().toString())
+                .priorityBoarding(booking.isPriorityBoarding())
+                .checkedBaggage(booking.isCheckedBaggage())
+                .baggageCount(booking.getBaggageCount())
+                .flight(flightMapper.toDTO(flight))
+                .userId(booking.getUserId())
+                .build();
     }
 }

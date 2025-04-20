@@ -1,6 +1,7 @@
 package com.lowcost.controller;
 
 import com.lowcost.dto.BookingDTO;
+import com.lowcost.dto.BookingWithFlightDTO;
 import com.lowcost.entity.Booking;
 import com.lowcost.mapper.BookingMapper;
 import com.lowcost.service.BookingService;
@@ -48,9 +49,9 @@ public class BookingController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BookingDTO>> getBookingsByUserId(@PathVariable int userId) {
+    public ResponseEntity<List<BookingWithFlightDTO>> getBookingsByUserId(@PathVariable int userId) {
         List<Booking> bookings = bookingService.getBookingsByUserId(userId);
-        return ResponseEntity.ok(bookingMapper.toDTOList(bookings));
+        return ResponseEntity.ok(bookingMapper.toDTOWithFlightList(bookings));
     }
 
     @GetMapping("/user/{userId}/status/{status}")
@@ -143,5 +144,10 @@ public class BookingController {
                     return ResponseEntity.noContent().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/with-flight")
+    public ResponseEntity<BookingWithFlightDTO> getBookingWithFlight(@PathVariable int id) {
+        return ResponseEntity.ok(bookingService.getBookingWithFlightDetails(id));
     }
 }

@@ -16,16 +16,16 @@ public class User {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "login")
+    @Column(name = "login", nullable = false)
     private String login;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "role")
     private String role;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "salt")

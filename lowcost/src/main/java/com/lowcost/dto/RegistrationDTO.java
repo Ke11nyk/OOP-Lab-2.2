@@ -7,5 +7,5 @@ public class RegistrationDTO {
     private String login;
     private String email;
     private String password;
-    private String role; 
+    private String role = "USER"; // Значення за замовчуванням
 }

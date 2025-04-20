@@ -1,14 +1,19 @@
 package com.lowcost.mapper;
 
+import com.lowcost.controller.FlightController;
 import com.lowcost.dto.BookingDTO;
+import com.lowcost.dto.BookingWithFlightDTO;
 import com.lowcost.entity.Booking;
 import com.lowcost.entity.Flight;
 import com.lowcost.entity.User;
 import com.lowcost.repository.FlightRepo;
 import com.lowcost.repository.UserRepo;
+import com.lowcost.service.FlightService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,11 +23,15 @@ public class BookingMapper {
 
     private final FlightRepo flightRepository;
     private final UserRepo userRepository;
+    private final FlightService flightService;
+    private final FlightMapper flightMapper;
 
     @Autowired
-    public BookingMapper(FlightRepo flightRepository, UserRepo userRepository) {
+    public BookingMapper(FlightRepo flightRepository, UserRepo userRepository, FlightService flightService, FlightMapper flightMapper) {
         this.flightRepository = flightRepository;
         this.userRepository = userRepository;
+        this.flightService = flightService;
+        this.flightMapper = flightMapper;
     }
 
     public BookingDTO toDTO(Booking booking) {
@@ -69,6 +78,39 @@ public class BookingMapper {
         return bookings.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<BookingWithFlightDTO> toDTOWithFlightList(List<Booking> bookings) {
+        if (bookings == null) {
+            return Collections.emptyList();  // Краще повертати пустий список замість null
+        }
+
+        return bookings.stream()
+                .map(this::toDTOWithFlight)
+                .collect(Collectors.toList());
+    }
+
+    private BookingWithFlightDTO toDTOWithFlight(Booking booking) {
+        if (booking == null) {
+            return null;
+        }
+
+        // Отримуємо пов'язаний рейс через сервіс
+        Flight flight = flightService.getFlightById(booking.getFlightId())
+                .orElseThrow(() -> new EntityNotFoundException("Flight not found for booking id: " + booking.getId()));
+
+        return BookingWithFlightDTO.builder()
+                .id(booking.getId())
+                .userId(booking.getUserId())
+                .bookingReference(booking.getBookingReference())
+                .bookingDate(booking.getBookingDate())
+                .totalPrice(booking.getTotalPrice())
+                .status(booking.getStatus().toString())
+                .priorityBoarding(booking.isPriorityBoarding())
+                .checkedBaggage(booking.isCheckedBaggage())
+                .baggageCount(booking.getBaggageCount())
+                .flight(flightMapper.toDTO(flight))  // Мапимо повний об'єкт рейсу
+                .build();
     }
 
     public Booking toEntity(BookingDTO bookingDTO) {

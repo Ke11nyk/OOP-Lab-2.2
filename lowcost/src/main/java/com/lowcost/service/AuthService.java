@@ -21,27 +21,27 @@ public class AuthService {
     private final UserRepo userRepository;
 
     public Optional<AuthDTO> register(RegistrationDTO registrationDTO) {
-        // Check if user already exists
+        // Перевірка на наявність користувача
         if (userRepository.findUserByEmail(registrationDTO.getEmail()).isPresent()) {
             return Optional.empty();
         }
 
-        // Generate salt and hash password
+        // Генерація солі та хешування пароля
         String salt = BCrypt.gensalt();
         String hashedPassword = BCrypt.hashpw(registrationDTO.getPassword(), salt);
 
-        // Create new user
+        // Створення нового користувача
         User newUser = new User();
-        newUser.setLogin(registrationDTO.getLogin());
+        newUser.setLogin(registrationDTO.getLogin()); // Встановлюємо логін
         newUser.setEmail(registrationDTO.getEmail());
-        newUser.setRole(registrationDTO.getRole() != null ? registrationDTO.getRole() : RoleUtil.USER);
+        newUser.setRole(registrationDTO.getRole());
         newUser.setPassword(hashedPassword);
         newUser.setSalt(salt);
 
-        // Save user (assuming your repo has a save method)
+        // Збереження користувача
         User savedUser = userRepository.save(newUser);
 
-        // Generate JWT token
+        // Генерація JWT токена
         Algorithm algorithm = Algorithm.HMAC256("baeldung");
         String jwt = JWT.create()
                 .withIssuer("Baeldung")
@@ -51,7 +51,7 @@ public class AuthService {
                 .withClaim("role", savedUser.getRole())
                 .sign(algorithm);
 
-        return Optional.of(new AuthDTO(jwt));
+        return Optional.of(new AuthDTO(jwt, savedUser.getLogin(), savedUser.getId()));
     }
 
     public Optional<AuthDTO> auth(LoginDTO loginDTO){
@@ -79,6 +79,6 @@ public class AuthService {
                 .withClaim("email", confirmedUser.getEmail())
                 .withClaim("role", confirmedUser.getRole())
                 .sign(algorithm);
-        return Optional.of(new AuthDTO(jwt));
+        return Optional.of(new AuthDTO(jwt, confirmedUser.getLogin(), confirmedUser.getId()));
     }
 }
