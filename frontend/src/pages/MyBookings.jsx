@@ -62,7 +62,7 @@ const MyBookings = () => {
                     onChange={handleFilterChange}
                 >
                     <option value="ALL">All Bookings</option>
-                    <option value="RESERVED">Reserved</option>
+                    <option value="PENDING">Pending</option>
                     <option value="CONFIRMED">Confirmed</option>
                     <option value="PAID">Paid</option>
                     <option value="CANCELLED">Cancelled</option>

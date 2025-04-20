@@ -12,7 +12,7 @@ const Home = () => {
                 const response = await getAllFlights();
                 // Display only active flights, sorted by departure time
                 const flights = response.data
-                    .filter(flight => flight.active)
+                    .filter(flight => flight.isActive)
                     .sort((a, b) => new Date(a.departureTime) - new Date(b.departureTime))
                     .slice(0, 6); // Display only a few flights
                 setFeaturedFlights(flights);
@@ -45,10 +45,10 @@ const Home = () => {
                         {featuredFlights.map((flight) => (
                             <div key={flight.id} className="flight-card">
                                 <div className="flight-info">
-                                    <h3>{flight.departure} to {flight.arrival}</h3>
+                                    <h3>{flight.departureAirport} to {flight.arrivalAirport}</h3>
                                     <p>Date: {new Date(flight.departureTime).toLocaleDateString()}</p>
                                     <p>Time: {new Date(flight.departureTime).toLocaleTimeString()}</p>
-                                    <p className="price">From {flight.price} €</p>
+                                    <p className="price">From {flight.currentPrice} €</p>
                                 </div>
                                 <Link to={`/flights/${flight.id}`} className="btn btn-secondary">View Details</Link>
                             </div>
